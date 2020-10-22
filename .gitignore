@@ -1,0 +1,6 @@
+venv/
+.idea
+logging_config.ini
+log/
+storage/
+data_storage/
