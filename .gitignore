@@ -3,4 +3,4 @@ venv/
 logging_config.ini
 log/
 storage/
-data_storage/
+file_storage/
