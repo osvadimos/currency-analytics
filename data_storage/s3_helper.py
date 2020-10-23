@@ -13,6 +13,8 @@ class S3Helper:
     )
 
     def __init__(self):
+        assert self.s3_bucket
+        assert self.s3_client
         pass
 
     def is_object_exist(self, s3_key: str) -> bool:
