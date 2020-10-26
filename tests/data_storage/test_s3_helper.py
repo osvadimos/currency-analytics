@@ -1,9 +1,8 @@
-import pathlib
 import os
-import random
+import pathlib
 import uuid
-
 from unittest import TestCase
+
 from data_storage.s3_helper import S3Helper
 
 
