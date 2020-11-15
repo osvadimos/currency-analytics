@@ -8,20 +8,19 @@ from data_storage.market_data_processor import MarketDataProcessor
 
 
 class MarketManager:
-
     local_storage_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
-    local_storage_file_name = 'market_manager_file.json'
-    storage_s3_key = 'market_storage/market_manager_file.json'
     s3_helper = S3Helper()
     markets = []
 
     def list_markets(self) -> List[Market]:
         logging.info(f"Starting list markets")
-        for market_id in os.walk(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']):
-            logging.info(f"Found {market_id} directory")
-            if os.path.isfile(Market.market_info_file_path(market_id)):
-                market = Market(str(market_id))
-                self.markets.append(market)
+
+        for market_ids in os.walk(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']):
+            for market_id in market_ids[1]:
+                logging.info(f"Found {market_id} directory")
+                if os.path.isfile(Market.market_info_file_path(market_id)):
+                    market = Market(str(market_id))
+                    self.markets.append(market)
         logging.info(f"Found {len(self.markets)} markets")
         return self.markets
 

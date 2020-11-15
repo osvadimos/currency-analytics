@@ -15,6 +15,9 @@ class Market:
         self.market_info = data['market_info']
         self.market_name = data['market_name']
 
+    def get_market_id(self) -> str:
+        return self.market_id
+
     @staticmethod
     def create_market(market_id: str, name: str, info: str, storage: str):
         market_information = {
@@ -38,3 +41,14 @@ class Market:
                                  market_id,
                                  market_id + Market.postfix)
         return info_file
+
+
+class MarketPair:
+
+    def __init__(self, market_sell: Market, market_buy: Market):
+        self.market_sell = market_sell
+        self.market_buy = market_buy
+        self.trade_symbol = f'{market_sell.market_id}/{market_buy.market_id}'
+
+    def get_pair_id(self) -> str:
+        return self.trade_symbol
