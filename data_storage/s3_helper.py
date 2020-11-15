@@ -1,6 +1,7 @@
-import boto3
-import os
 import logging
+import os
+
+import boto3
 
 
 class S3Helper:
@@ -15,11 +16,16 @@ class S3Helper:
     def __init__(self):
         assert self.s3_bucket
         assert self.s3_client
-        pass
 
     def is_object_exist(self, s3_key: str) -> bool:
-        logging.info(f"Start checking object:{s3_key}")
-
+        logging.info(f'Start checking object: {s3_key}')
+        response = self.s3_client.list_objects_v2(Bucket=self.s3_bucket,
+                                                  Prefix=s3_key,
+                                                  Delimiter='/')
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                if obj['Key'] == s3_key:
+                    return True
         return False
 
     def save_object_on_s3(self, s3_key: str, object_body: str):
@@ -28,8 +34,34 @@ class S3Helper:
         obj.put(Body=object_body)
         logging.info(f'Uploaded new file:{s3_key} to s3')
 
+    def read_s3_object_as_string(self, s3_key) -> str:
+        obj = self.s3_client.Object(self.s3_bucket, s3_key)
+        object_from_s3 = obj.get()['Body'].read().decode('utf-8')
+        # todo save object locally
+        return object_from_s3
+
     def read_object_and_save_as_file(self, s3_key, file_absolute_path) -> str:
         obj = self.s3_client.Object(self.s3_bucket, s3_key)
         object_from_s3 = obj.get()['Body'].read().decode('utf-8')
         # todo save object locally
         return object_from_s3
+
+    def list_s3_objects(self, prefix: str):
+        # todo add for over 1k files
+        paginator = self.s3_client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=self.s3_bucket, Prefix=prefix)
+        list_of_objects = []
+        logging.info('list of objects: ', list_of_objects)
+        for page in pages:
+            for obj in page['Contents']:
+                list_of_objects.append(obj['Key'])
+                logging.info(f'Added object {obj["Key"]} to list of objects')
+        return list_of_objects
+
+    def synchronize_directory(self, local_directory, s3_directory, is_local_to_s3=True):
+        logging.info(f'Synchronisation of local:{local_directory} with destination:{s3_directory}')
+        location = local_directory if is_local_to_s3 else f"s3://{self.s3_bucket}/{s3_directory}"
+        destination = local_directory if not is_local_to_s3 else f's3://{self.s3_bucket}/{s3_directory}'
+        cmd = f'aws s3 sync {location} {destination} '
+        os.system(cmd)
+        logging.info(f'Synced well of local:{local_directory} with destination:{s3_directory}')
