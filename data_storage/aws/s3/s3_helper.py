@@ -58,10 +58,12 @@ class S3Helper:
                 logging.info(f'Added object {obj["Key"]} to list of objects')
         return list_of_objects
 
-    def synchronize_directory(self, local_directory, s3_directory, is_local_to_s3=True):
+    def synchronize_directory(self, local_directory, is_local_to_s3=True):
+        s3_directory = local_directory.replace(os.environ['HOME'], "")
+        s3_path = f's3://{os.path.join(self.s3_bucket, *s3_directory.split(os.sep))}'
         logging.info(f'Synchronisation of local:{local_directory} with destination:{s3_directory}')
-        location = local_directory if is_local_to_s3 else f"s3://{self.s3_bucket}/{s3_directory}"
-        destination = local_directory if not is_local_to_s3 else f's3://{self.s3_bucket}/{s3_directory}'
-        cmd = f'aws s3 sync {location} {destination} '
+        location = local_directory if is_local_to_s3 else s3_path
+        destination = local_directory if not is_local_to_s3 else s3_path
+        cmd = f'aws --profile crypto s3 sync {location}/ {destination} '
         os.system(cmd)
         logging.info(f'Synced well of local:{local_directory} with destination:{s3_directory}')

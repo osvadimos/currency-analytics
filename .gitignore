@@ -4,3 +4,4 @@ logging_config.ini
 log/
 storage/
 file_storage/
+env

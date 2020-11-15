@@ -1,10 +1,11 @@
 import os
 import pathlib
 import uuid
+import logging
 from unittest import TestCase
 
-from data_storage.s3_helper import S3Helper
-
+from data_storage.aws.s3.s3_helper import S3Helper
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 class TestS3Helper(TestCase):
 

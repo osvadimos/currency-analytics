@@ -1,7 +1,7 @@
 import logging
 import os
 import pandas as pd
-from data_storage.s3_helper import S3Helper
+from data_storage.aws.s3.s3_helper import S3Helper
 
 
 class MarketDataProcessor:
