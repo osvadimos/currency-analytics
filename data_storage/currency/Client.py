@@ -3,6 +3,7 @@ import hmac
 from datetime import datetime, timedelta
 from enum import Enum
 
+import numpy as np
 import requests
 
 
@@ -314,9 +315,9 @@ class Client(object):
                   'interval': interval.value,
                   'limit': limit}
 
-        if start_time:
+        if start_time and type(start_time) is not np.int64:
             params['startTime'] = self._to_epoch_miliseconds(start_time)
-        if end_time:
+        if end_time and type(end_time) is not np.int64:
             params['endTime'] = self._to_epoch_miliseconds(end_time)
         r = requests.get(CurrencyComConstants.KLINES_DATA_ENDPOINT,
                          params=params)

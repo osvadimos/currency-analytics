@@ -2,14 +2,14 @@ import logging
 import os
 from typing import List
 
-from data_storage.aws.s3.s3_helper import S3Helper
+from data_storage.aws.s3.S3Service import S3Service
 from data_storage.market.Market import Market
 from data_storage.market_data_processor import MarketDataProcessor
 
 
 class MarketManager:
     local_storage_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
-    s3_helper = S3Helper()
+    s3_helper = S3Service()
     markets = []
 
     def list_markets(self) -> List[Market]:
@@ -43,7 +43,7 @@ class MarketManager:
         return []
 
     def process_markets(self):
-        s3_helper = S3Helper()
+        s3_helper = S3Service()
         s3_helper.synchronize_directory(
             self.local_storage_directory,
             is_local_to_s3=False)

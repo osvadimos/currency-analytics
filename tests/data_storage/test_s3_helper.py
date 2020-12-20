@@ -4,12 +4,12 @@ import uuid
 import logging
 from unittest import TestCase
 
-from data_storage.aws.s3.s3_helper import S3Helper
+from data_storage.aws.s3.S3Service import S3Service
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 class TestS3Helper(TestCase):
 
-    s3_helper = S3Helper()
+    s3_helper = S3Service()
     test_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
 
     def test_random_string(self):

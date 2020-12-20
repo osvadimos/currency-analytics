@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from data_storage.data.DeployService import DeployService
+from tests.data_storage.aws.s3.S3ServiceMock import S3ServiceMock
 from tests.data_storage.currency.CurrencyServiceMock import CurrencyServiceMock
 
 
@@ -13,11 +14,21 @@ class TestDeployService(TestCase):
     def test_deploy_data_if_empty_storage(self):
         deploy_service = DeployService()
         deploy_service.currency_service = CurrencyServiceMock()
+        deploy_service.s3_helper = S3ServiceMock()
         # todo remove file from storage if eixsts
 
         deploy_service.deploy_data()
 
         # todo add file to storage if not exists
+
+    def test_upgrade_data_for_symbol(self):
+        btc_symbol = CurrencyServiceMock.generate_bitcoin_symbol()
+        deploy_service = DeployService()
+        deploy_service.currency_service = CurrencyServiceMock()
+        deploy_service.s3_helper = S3ServiceMock()
+        # todo remove file from storage if eixsts
+
+        deploy_service.upgrade_symbol_data(btc_symbol)
 
     def test_deploy_data_if_not_empty_storage(self):
         # todo add somfe files first and then check if they are changed or something.

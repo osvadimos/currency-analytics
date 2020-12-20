@@ -1,6 +1,11 @@
+import json
 from unittest import TestCase
 
+from data_storage.currency.Client import CandlesticksChartIntervals
 from data_storage.currency.CurrencyService import CurrencyService
+from data_storage.data.DeployService import DeployService
+from tests.data_storage.currency.CurrencyServiceMock import CurrencyServiceMock
+import pandas as pd
 
 
 class TestCurrencyService(TestCase):
@@ -9,6 +14,26 @@ class TestCurrencyService(TestCase):
         currency_service = CurrencyService()
         result = currency_service.pull_depth("BTC")
         result
+
+    def test_pull_price_history(self):
+        currency_service = CurrencyService()
+        bitcoin = CurrencyServiceMock.generate_bitcoin_symbol()
+        price_history = currency_service.pull_price_history(bitcoin,
+                                                            CandlesticksChartIntervals.MINUTE,
+                                                            None)
+        js = json.dumps(price_history)
+        js
+
+    def test_pull_price_history_with_start(self):
+        currency_service = CurrencyService()
+        bitcoin = CurrencyServiceMock.generate_bitcoin_symbol()
+        latest_data = CurrencyServiceMock.pull_latest_bitcoin_data()
+        btc_dataframe = pd.DataFrame(latest_data, columns=DeployService.symbol_columns)
+        first_record_time = btc_dataframe['open_time'].min()
+        price_history = currency_service.pull_price_history(bitcoin,
+                                                            CandlesticksChartIntervals.MINUTE,
+                                                            first_record_time)
+        price_history
 
     def test_exchange_inf(self):
         currency_service = CurrencyService()

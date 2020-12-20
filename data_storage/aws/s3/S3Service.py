@@ -4,7 +4,7 @@ import os
 import boto3
 
 
-class S3Helper:
+class S3Service:
     s3_bucket = os.environ['S3_BUCKET']
     s3_client = boto3.client(
         's3',

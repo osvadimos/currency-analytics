@@ -1,7 +1,7 @@
 import logging
 import os
 import pandas as pd
-from data_storage.aws.s3.s3_helper import S3Helper
+from data_storage.aws.s3.S3Service import S3Service
 
 
 class MarketDataProcessor:
@@ -43,7 +43,7 @@ class MarketDataProcessor:
 
     def pull_from_s3(self, storage_file_path, s3_key):
         if not os.path.isfile(storage_file_path):
-            s3_helper = S3Helper()
+            s3_helper = S3Service()
             logging.info(f"Download from s3:{s3_key}")
             s3_helper.read_object_and_save_as_file(s3_key,
                                                    storage_file_path)

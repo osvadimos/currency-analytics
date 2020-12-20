@@ -2,7 +2,9 @@ import json
 import logging
 import os
 
-from data_storage.aws.s3.s3_helper import S3Helper
+import pandas as pd
+
+from data_storage.aws.s3.S3Service import S3Service
 from data_storage.currency.Client import CandlesticksChartIntervals
 from data_storage.currency.CurrencyService import CurrencyService
 
@@ -11,9 +13,11 @@ from data_storage.currency.CurrencyService import CurrencyService
 class DeployService:
     exchange_info_file_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], "exchange_info.json")
 
+    symbol_columns = ["open_time", "open", "high", "low", "close", "volume"]
+
     def __init__(self):
         self.currency_service = CurrencyService()
-        self.s3_helper = S3Helper()
+        self.s3_helper = S3Service()
 
     # todo test
     def deploy_data(self):
@@ -30,15 +34,29 @@ class DeployService:
                 exchange_file.close()
 
         for symbol in result_exchange_info['symbols']:
-            result = self.currency_service.pull_price_history(symbol,
-                                                              CandlesticksChartIntervals.MINUTE)
-            # todo find latest saved date
-            # todo if not data
-            result = self.currency_service.pull_price_history(symbol)
-            result
+            self.upgrade_symbol_data(symbol)
 
         logging.info(f"Synchronized all updated data with s3")
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=False)
+
+    def upgrade_symbol_data(self, symbol):
+        result = self.currency_service.pull_price_history(symbol,
+                                                          CandlesticksChartIntervals.MINUTE,
+                                                          None)
+        data_frame = pd.DataFrame(result, columns=self.symbol_columns)
+
+        last_date_time = data_frame['open_time'].min()
+
+        result = self.currency_service.pull_price_history(symbol,
+                                                          CandlesticksChartIntervals.MINUTE,
+                                                          last_date_time)
+        result
+        # todo find latest saved date
+        # todo if not data pull gradually, first all minute data, then 15ins ect
+        result = self.currency_service.pull_price_history(symbol,
+                                                          CandlesticksChartIntervals.MINUTE)
+        result
+        pass
 
     # todo test method
     @staticmethod
