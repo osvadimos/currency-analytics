@@ -51,7 +51,7 @@ class OrderSide(Enum):
     SELL = 'SELL'
 
 
-class CandlesticksChartInervals(Enum):
+class CandlesticksChartIntervals(Enum):
     MINUTE = '1m'
     FIVE_MINUTES = '5m'
     FIFTEEN_MINUTES = '15m'
@@ -276,7 +276,7 @@ class Client(object):
         return r.json()
 
     def get_klines(self, symbol,
-                   interval: CandlesticksChartInervals,
+                   interval: CandlesticksChartIntervals,
                    start_time: datetime = None,
                    end_time: datetime = None,
                    limit=500):

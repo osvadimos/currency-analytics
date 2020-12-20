@@ -9,4 +9,5 @@ logger = logging.getLogger()
 
 if __name__ == '__main__':
     logging.info("Start deploying")
-    market_manager = DeployService()
+    deploy_service = DeployService()
+    deploy_service.deploy_data()

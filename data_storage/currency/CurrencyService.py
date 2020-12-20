@@ -1,7 +1,6 @@
 import os
 
-from data_storage.market.Market import MarketPair
-from data_storage.currency.Client import Client, CandlesticksChartInervals
+from data_storage.currency.Client import Client, CandlesticksChartIntervals
 
 
 class CurrencyService:
@@ -12,12 +11,13 @@ class CurrencyService:
     def __init__(self):
         self.currency_client = Client(self.token, self.secret)
 
-    def pull_price_history(self, market_pair: MarketPair):
-        klines = self.currency_client.get_klines(
-            market_pair.get_pair_id(),
-            CandlesticksChartInervals.DAY)
-        print(klines)
-        pass
+    def pull_price_history(self, symbol,
+                           intervals: CandlesticksChartIntervals):
+        k_lines = self.currency_client.get_klines(symbol['symbol'],
+                                                  intervals,
+                                                  limit=1000)
+
+        return k_lines
 
     def pull_depth(self, symbol):
         result = self.currency_client.get_order_book(symbol)
