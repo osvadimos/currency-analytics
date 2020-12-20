@@ -40,23 +40,24 @@ class DeployService:
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=False)
 
     def upgrade_symbol_data(self, symbol):
-        result = self.currency_service.pull_price_history(symbol,
-                                                          CandlesticksChartIntervals.MINUTE,
-                                                          None)
+
+        result = []
+
+        for interval in [CandlesticksChartIntervals.FIVE_MINUTES,
+                         CandlesticksChartIntervals.FIFTEEN_MINUTES,
+                         CandlesticksChartIntervals.FOUR_HOURS,
+                         CandlesticksChartIntervals.DAY,
+                         CandlesticksChartIntervals.WEEK]:
+
+            result.extend(self.currency_service.pull_price_history(symbol,
+                                                                   interval,
+                                                                   None))
+            print(f"so far:{len(result)}")
         data_frame = pd.DataFrame(result, columns=self.symbol_columns)
 
-        last_date_time = data_frame['open_time'].min()
-
-        result = self.currency_service.pull_price_history(symbol,
-                                                          CandlesticksChartIntervals.MINUTE,
-                                                          last_date_time)
-        result
-        # todo find latest saved date
-        # todo if not data pull gradually, first all minute data, then 15ins ect
-        result = self.currency_service.pull_price_history(symbol,
-                                                          CandlesticksChartIntervals.MINUTE)
-        result
-        pass
+        records_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
+                                    f"{symbol['baseAsset']}-{symbol['quoteAsset']}.json")
+        data_frame.to_json(records_path)
 
     # todo test method
     @staticmethod
