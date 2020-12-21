@@ -58,6 +58,7 @@ class S3Service:
                 logging.info(f'Added object {obj["Key"]} to list of objects')
         return list_of_objects
 
+    #todo create test
     def synchronize_directory(self, local_directory, is_local_to_s3=True):
         s3_directory = local_directory.replace(os.environ['HOME'], "")
         s3_path = f's3://{os.path.join(self.s3_bucket, *s3_directory.split(os.sep))}'
