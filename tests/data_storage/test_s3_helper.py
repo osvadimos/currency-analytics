@@ -65,10 +65,8 @@ class TestS3Helper(TestCase):
         # в терминале "aws --profile clipnow s3 cp s3://bucket/absolute_file /tmp/local_file
 
     def test_sync_directories_from_s3(self):
-
-
-
-        self.assertTrue(pathlib.Path(self.test_directory)
+        print("Some actions")
+        self.assertTrue(pathlib.Path(self.test_directory))
 
 
     @staticmethod
