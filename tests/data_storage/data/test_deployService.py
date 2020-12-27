@@ -1,3 +1,4 @@
+import json
 from unittest import TestCase
 
 from data_storage.data.DeployService import DeployService
@@ -29,6 +30,17 @@ class TestDeployService(TestCase):
         # todo remove file from storage if eixsts
 
         deploy_service.upgrade_symbol_data(btc_symbol)
+
+    def test_update_old_file(self):
+        # todo where little file is getting created on every test run
+        old_file_path = "test_assets/little/exchange_info.json"
+        bit_file_path = "test_assets/big/exchange_info.json"
+        with open(bit_file_path, 'r') as big_file:
+            data = big_file.read()
+            big_file.close()
+
+        DeployService.update_symbols_data(old_file_path, json.loads(data))
+        self.assertTrue(True)
 
     def test_deploy_data_if_not_empty_storage(self):
         # todo add somfe files first and then check if they are changed or something.

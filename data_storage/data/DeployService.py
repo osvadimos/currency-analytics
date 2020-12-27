@@ -29,10 +29,8 @@ class DeployService:
         result_exchange_info = self.currency_service.pull_exchange_info()
         if not self.is_data_same(self.exchange_info_file_path, result_exchange_info):
             logging.info(f"Markets data is not the same.")
+            self.update_symbols_data(self.exchange_info_file_path, result_exchange_info)
 
-            with open(self.exchange_info_file_path, 'w') as exchange_file:
-                exchange_file.write(json.dumps(result_exchange_info))
-                exchange_file.close()
         else:
             logging.info(f"Markets has not changed since last time.")
 
@@ -61,6 +59,7 @@ class DeployService:
                 result.extend(self.currency_service.pull_price_history(symbol,
                                                                        interval,
                                                                        None))
+                logging.info(f"Updating interval:{interval}, symbol:{symbol['symbol']}")
                 current_data_frame = pd.DataFrame(result, columns=self.symbol_columns)
                 if int(latest_record_date.timestamp() * 1000) > current_data_frame['open_time'].min():
                     latest_records_data_frame = current_data_frame[
@@ -98,3 +97,41 @@ class DeployService:
             exchange_file.close()
 
         return len(current_info['symbols']) == len(json.loads(stored_data)['symbols'])
+
+    # todo create a test
+    # todo where little file is getting created on every test run
+    @staticmethod
+    def update_symbols_data(absolute_file_path, current_info):
+
+        with open(absolute_file_path, 'r') as exchange_file:
+            stored_data = exchange_file.read()
+            exchange_file.close()
+        new_symbols = {}
+        old_symbols = {}
+        for new_symbol in current_info['symbols']:
+            new_symbols[f"{new_symbol['symbol']}"] = new_symbol
+
+        for old_symbol in json.loads(stored_data)['symbols']:
+            old_symbols[f'{old_symbol["symbol"]}'] = old_symbol
+
+        refactored_symbols = []
+        old_symbols_copy = old_symbols.copy()
+        for symbol_key in old_symbols_copy:
+            symbol_value = old_symbols_copy[symbol_key]
+            if symbol_key in new_symbols:
+                refactored_symbols.append(new_symbols[symbol_key])
+            else:
+                logging.info(f"Appending new symbol:{symbol_key} to list")
+                refactored_symbols.append(symbol_value)
+            del old_symbols[symbol_key]
+
+        for symbol_key in new_symbols:
+            if symbol_key not in refactored_symbols:
+                refactored_symbols.append(new_symbols[symbol_key])
+
+        with open(absolute_file_path, 'w') as exchange_file:
+            current_info['symbols'] = refactored_symbols
+            exchange_file.write(json.dumps(current_info))
+            exchange_file.close()
+
+        logging.info(f"Updated markets info with {len(refactored_symbols)} symbols")
