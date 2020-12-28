@@ -13,7 +13,12 @@ class TestS3Helper(TestCase):
     test_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
 
     def setUp(self) -> None:
-        #todo clean s3
+        # todo clean s3
+        self.s3_helper.clear_directory('Projects/currency-analytics/tests/data_storage/localdata/')
+        pass
+
+    def tearDown(self) -> None:
+        self.s3_helper.clear_directory('Projects/currency-analytics/tests/data_storage/localdata/')
         pass
 
     def test_random_string(self):
@@ -49,27 +54,34 @@ class TestS3Helper(TestCase):
 
     def test_sync_directories_to_s3(self):
         s3_service = S3Service()
-        #todo create file in directory
-        absolute_file = os.path.join( self.test_directory, TestS3Helper.create_random_string(10))
-        random_file_content =  TestS3Helper.create_random_string(10)
-        #todo file_content in file
-        #todo write some string to a file
+        # todo create file in directory
+        absolute_file = os.path.join(self.test_directory, TestS3Helper.create_random_string(10))
+        absolute_file_opening = open(absolute_file, 'tw')
+        random_file_content = TestS3Helper.create_random_string(10)
+        # todo file_content in file
+        absolute_file_opening.write(random_file_content)
+        absolute_file_opening.close()
+        # todo write some string to a file
         s3_service.synchronize_directory(self.test_directory, is_local_to_s3=True)
+        # todo check if object exists.
+        # Check file on S3
+        response = s3_service.s3_client.list_objects_v2(Bucket=s3_service.s3_bucket,
+                                                        Prefix=absolute_file,
+                                                        Delimiter='/')
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                if obj['Key'] == absolute_file:
+                    print('File found!')
+                else:
+                    print('File not found!')
+        # End check file on S3
         print(f'file:{absolute_file}')
         print(f"aws s3 ls {self.test_directory}")
         print(f"aws s3 cp {absolute_file} /tmp/tmp-file.txt")
-        #todo check if object exists.
-        #self.assertTrue(pathlib.Path(local_file_path).is_fifo())
-        # в терминале "aws --profile clipnow s3 ls self.test_directory
-        # в терминале "aws --profile clipnow s3 ls s3://bucket/absolute_file
-        # в терминале "aws --profile clipnow s3 cp s3://bucket/absolute_file /tmp/local_file
 
     def test_sync_directories_from_s3(self):
-
-
-
-        self.assertTrue(pathlib.Path(self.test_directory)
-
+        s3_service = S3Service()
+        s3_service.synchronize_directory(self.test_directory, is_local_to_s3=False)
 
     @staticmethod
     def create_random_string(str_length: int = 5) -> str:
