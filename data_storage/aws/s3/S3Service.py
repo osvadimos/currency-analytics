@@ -58,7 +58,7 @@ class S3Service:
                 logging.info(f'Added object {obj["Key"]} to list of objects')
         return list_of_objects
 
-    #todo create test
+    # todo create test
     def synchronize_directory(self, local_directory, is_local_to_s3=True):
         s3_directory = local_directory.replace(os.environ['HOME'], "")
         s3_path = f's3://{os.path.join(self.s3_bucket, *s3_directory.split(os.sep))}'
@@ -68,3 +68,14 @@ class S3Service:
         cmd = f'aws --profile crypto s3 sync {location}/ {destination} '
         os.system(cmd)
         logging.info(f'Synced well of local:{local_directory} with destination:{s3_directory}')
+
+    # Clear directory
+    def clear_directory(self, directory):
+        logging.info(f'Start cleaning directory {directory}')
+        response = self.s3_client.list_objects_v2(Bucket=self.s3_bucket,
+                                                  Prefix=directory,
+                                                  Delimiter='/')
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                self.s3_client.delete_object(Bucket=self.s3_bucket, Key=obj['Key'])
+        logging.info(f'Cleaning directory {directory} done!')
