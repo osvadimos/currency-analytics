@@ -2,14 +2,19 @@ import os
 import pathlib
 import uuid
 import logging
+import requests
+import json
 from unittest import TestCase
 
 from data_storage.aws.s3.S3Service import S3Service
+from data_storage.alert_service.AlertService import AlertService
+
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
-class TestS3Helper(TestCase):
 
+class TestS3Helper(TestCase):
     s3_helper = S3Service()
+    alert_helper = AlertService()
     test_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
 
     def setUp(self) -> None:
@@ -53,7 +58,6 @@ class TestS3Helper(TestCase):
         os.remove(local_file_path)
 
     def test_sync_directories_to_s3(self):
-        s3_service = S3Service()
         # todo create file in directory
         absolute_file = os.path.join(self.test_directory, TestS3Helper.create_random_string(10))
         absolute_file_opening = open(absolute_file, 'tw')
@@ -62,10 +66,10 @@ class TestS3Helper(TestCase):
         absolute_file_opening.write(random_file_content)
         absolute_file_opening.close()
         # todo write some string to a file
-        s3_service.synchronize_directory(self.test_directory, is_local_to_s3=True)
+        self.s3_helper.synchronize_directory(self.test_directory, is_local_to_s3=True)
         # todo check if object exists.
         # Check file on S3
-        response = s3_service.s3_client.list_objects_v2(Bucket=s3_service.s3_bucket,
+        response = self.s3_helper.s3_client.list_objects_v2(Bucket=self.s3_helper.s3_bucket,
                                                         Prefix=absolute_file,
                                                         Delimiter='/')
         if 'Contents' in response:
@@ -80,8 +84,10 @@ class TestS3Helper(TestCase):
         print(f"aws s3 cp {absolute_file} /tmp/tmp-file.txt")
 
     def test_sync_directories_from_s3(self):
-        s3_service = S3Service()
-        s3_service.synchronize_directory(self.test_directory, is_local_to_s3=False)
+        self.s3_helper.synchronize_directory(self.test_directory, is_local_to_s3=False)
+
+    def test_send_message_to_slack(self):
+        self.alert_helper.send_message_to_slack('New random test: ' + TestS3Helper.create_random_string(10))
 
     @staticmethod
     def create_random_string(str_length: int = 5) -> str:
