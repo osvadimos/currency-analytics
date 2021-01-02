@@ -12,10 +12,11 @@ class CurrencyService:
     def __init__(self):
         self.currency_client = Client(self.token, self.secret)
 
-    def pull_price_history(self, symbol,
+    def pull_price_history(self,
+                           symbol,
                            intervals: CandlesticksChartIntervals,
                            end_date_time):
-        k_lines = self.currency_client.get_klines(symbol['symbol'],
+        k_lines = self.currency_client.get_klines(symbol,
                                                   intervals,
                                                   limit=1000,
                                                   end_time=end_date_time)

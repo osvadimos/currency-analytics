@@ -1,13 +1,11 @@
+import logging
 import os
 import pathlib
 import uuid
-import logging
-import requests
-import json
 from unittest import TestCase
 
-from data_storage.aws.s3.S3Service import S3Service
 from data_storage.alert_service.AlertService import AlertService
+from data_storage.aws.s3.S3Service import S3Service
 
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 

@@ -3,14 +3,12 @@ import logging
 import os
 from datetime import datetime, timezone, timedelta
 
-import pandas as pd
-
 from data_storage.aws.s3.S3Service import S3Service
-from data_storage.currency.Client import CandlesticksChartIntervals
 from data_storage.currency.CurrencyService import CurrencyService
-
-
 # todo add explicit logging
+from data_storage.symbol.Symbol import Symbol
+
+
 class DeployService:
     exchange_info_file_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], "exchange_info.json")
 
@@ -25,7 +23,8 @@ class DeployService:
         # todo update from s3 first
         logging.info(f"Start sync with s3 s3")
 
-        self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=False)
+        self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
+                                             is_local_to_s3=False)
 
         result_exchange_info = self.currency_service.pull_exchange_info()
         if not self.is_data_same(self.exchange_info_file_path, result_exchange_info):
@@ -34,68 +33,18 @@ class DeployService:
         else:
             logging.info(f"Markets has not changed since last time.")
 
-        for symbol in result_exchange_info['symbols']:
-            if self.is_trading_open(symbol['tradingHours']):
-                logging.info(f"Trading for symbol:{symbol['name']} is open. Start updating.")
-                self.upgrade_symbol_data(symbol)
+        for symbol_information in result_exchange_info['symbols']:
+            symbol = Symbol(symbol_information)
+            if symbol.is_trading_open():
+                logging.info(f"Trading for symbol:{symbol.name} is open. Start updating.")
+                symbol.upgrade_symbol_data(self.currency_service)
             else:
-                logging.info(f"Trading for symbol:{symbol['name']} is closed.")
+                logging.info(f"Trading for symbol:{symbol.name} is closed.")
 
         logging.info(f"Synchronized all updated data with s3")
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
 
-    def upgrade_symbol_data(self, symbol):
-
-        result = []
-        logging.info(f"Start updating Symbol:{symbol['name']}")
-        records_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
-                                    f"{symbol['baseAsset']}-{symbol['quoteAsset']}.json")
-        if os.path.exists(records_path):
-            existing_data_frame = pd.read_json(records_path)
-            latest_record_date = existing_data_frame['open_time'].max()
-            logging.info(f"{symbol['baseAsset']}-{symbol['quoteAsset']}.json : exists")
-            for interval in [CandlesticksChartIntervals.MINUTE,
-                             CandlesticksChartIntervals.FIVE_MINUTES,
-                             CandlesticksChartIntervals.FIFTEEN_MINUTES,
-                             CandlesticksChartIntervals.FOUR_HOURS,
-                             CandlesticksChartIntervals.DAY,
-                             CandlesticksChartIntervals.WEEK]:
-                currency_request_result = self.currency_service.pull_price_history(symbol,
-                                                                                   interval,
-                                                                                   None)
-
-                if len(currency_request_result) == 0:
-                    logging.info(f"Symbol:{symbol['name']} is empty for some reason.")
-                    break
-                result.extend(currency_request_result)
-                logging.info(f"Updating interval:{interval}, symbol:{symbol['symbol']}")
-                current_data_frame = pd.DataFrame(result, columns=self.symbol_columns)
-                if int(latest_record_date.timestamp() * 1000) > current_data_frame['open_time'].min():
-                    latest_records_data_frame = current_data_frame[
-                        current_data_frame['open_time'] > int(latest_record_date.timestamp() * 1000)]
-                    existing_data_frame.append(latest_records_data_frame)
-                    logging.info(f"Found open time:{current_data_frame['open_time'].min()} and append to existing df")
-                    break
-            existing_data_frame.to_json(records_path)
-            logging.info(f"Got out of loop on interval:{interval} and saved in file:{records_path}")
-        else:
-
-            for interval in [CandlesticksChartIntervals.MINUTE,
-                             CandlesticksChartIntervals.FIVE_MINUTES,
-                             CandlesticksChartIntervals.FIFTEEN_MINUTES,
-                             CandlesticksChartIntervals.FOUR_HOURS,
-                             CandlesticksChartIntervals.DAY,
-                             CandlesticksChartIntervals.WEEK]:
-                result.extend(self.currency_service.pull_price_history(symbol,
-                                                                       interval,
-                                                                       None))
-                logging.info(f"so far:{len(result)}")
-            data_frame = pd.DataFrame(result, columns=self.symbol_columns)
-            data_frame.to_json(records_path)
-
-        logging.info(f"Update for Symbol:{symbol['name']} is complete")
-
-    #todo create parsing time and test
+    # todo create parsing time and test
     @staticmethod
     def is_trading_open(trading_hours: str) -> bool:
         # todo parse hours
