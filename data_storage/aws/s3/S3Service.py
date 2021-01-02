@@ -67,7 +67,7 @@ class S3Service:
         destination = local_directory if not is_local_to_s3 else s3_path
         cmd = f'aws --profile crypto s3 sync {location}/ {destination} '
         os.system(cmd)
-        logging.info(f'Synced well of local:{local_directory} with destination:{s3_directory}')
+        logging.info(f'Synced well of local:{local_directory} {" from " if is_local_to_s3 else " to "} destination:{s3_directory}')
 
     # Clear directory
     def clear_directory(self, directory):

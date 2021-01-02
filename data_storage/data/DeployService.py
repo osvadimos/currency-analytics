@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime, timezone, timedelta
 
 import pandas as pd
 
@@ -30,12 +31,15 @@ class DeployService:
         if not self.is_data_same(self.exchange_info_file_path, result_exchange_info):
             logging.info(f"Markets data is not the same.")
             self.update_symbols_data(self.exchange_info_file_path, result_exchange_info)
-
         else:
             logging.info(f"Markets has not changed since last time.")
 
         for symbol in result_exchange_info['symbols']:
-            self.upgrade_symbol_data(symbol)
+            if self.is_trading_open(symbol['tradingHours']):
+                logging.info(f"Trading for symbol:{symbol['name']} is open. Start updating.")
+                self.upgrade_symbol_data(symbol)
+            else:
+                logging.info(f"Trading for symbol:{symbol['name']} is closed.")
 
         logging.info(f"Synchronized all updated data with s3")
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
@@ -43,7 +47,7 @@ class DeployService:
     def upgrade_symbol_data(self, symbol):
 
         result = []
-
+        logging.info(f"Start updating Symbol:{symbol['name']}")
         records_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
                                     f"{symbol['baseAsset']}-{symbol['quoteAsset']}.json")
         if os.path.exists(records_path):
@@ -56,9 +60,14 @@ class DeployService:
                              CandlesticksChartIntervals.FOUR_HOURS,
                              CandlesticksChartIntervals.DAY,
                              CandlesticksChartIntervals.WEEK]:
-                result.extend(self.currency_service.pull_price_history(symbol,
-                                                                       interval,
-                                                                       None))
+                currency_request_result = self.currency_service.pull_price_history(symbol,
+                                                                                   interval,
+                                                                                   None)
+
+                if len(currency_request_result) == 0:
+                    logging.info(f"Symbol:{symbol['name']} is empty for some reason.")
+                    break
+                result.extend(currency_request_result)
                 logging.info(f"Updating interval:{interval}, symbol:{symbol['symbol']}")
                 current_data_frame = pd.DataFrame(result, columns=self.symbol_columns)
                 if int(latest_record_date.timestamp() * 1000) > current_data_frame['open_time'].min():
@@ -80,11 +89,33 @@ class DeployService:
                 result.extend(self.currency_service.pull_price_history(symbol,
                                                                        interval,
                                                                        None))
-                print(f"so far:{len(result)}")
+                logging.info(f"so far:{len(result)}")
             data_frame = pd.DataFrame(result, columns=self.symbol_columns)
             data_frame.to_json(records_path)
 
-        print(f"Update for Symbol:{symbol['name']} is complete")
+        logging.info(f"Update for Symbol:{symbol['name']} is complete")
+
+    #todo create parsing time and test
+    @staticmethod
+    def is_trading_open(trading_hours: str) -> bool:
+        # todo parse hours
+        # todo covert server time
+        return True
+        trading_days = trading_hours.split(';')
+        list_days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        assert "UTC" in trading_hours and list_days[0] in trading_days[1]
+        now_utc = datetime.now(timezone.utc)
+        week_start = now_utc - timedelta(days=now_utc.weekday(),
+                                         hours=now_utc.hour,
+                                         minutes=now_utc.minute,
+                                         seconds=now_utc.second)
+
+        for trading_day in trading_days:
+            if trading_day.strip().split(' ')[0] in list_days:
+                list_hours = trading_day.strip()[3:].split(',')
+        now_utc.weekday()
+
+        return True
 
     # todo test method
     @staticmethod

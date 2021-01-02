@@ -9,3 +9,4 @@ logger = logging.getLogger()
 if __name__ == '__main__':
     logging.info("Start processing")
     market_manager = MarketManager()
+    market_manager.process_markets()

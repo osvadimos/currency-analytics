@@ -1,3 +1,4 @@
+import logging
 import os
 
 from data_storage.currency.Client import Client, CandlesticksChartIntervals
@@ -18,8 +19,10 @@ class CurrencyService:
                                                   intervals,
                                                   limit=1000,
                                                   end_time=end_date_time)
+        if not isinstance(k_lines, list):
+            logging.info(f"Wront return data format with message:{k_lines}")
 
-        return k_lines
+        return k_lines if isinstance(k_lines, list) else []
 
     def pull_depth(self, symbol):
         result = self.currency_client.get_order_book(symbol)
