@@ -3,6 +3,8 @@ import os
 from typing import List
 
 from data_storage.aws.s3.S3Service import S3Service
+from data_storage.currency.CurrencyService import CurrencyService
+from data_storage.data.DeployService import DeployService
 from data_storage.market.Market import Market
 from data_storage.market_data_processor import MarketDataProcessor
 
@@ -10,6 +12,7 @@ from data_storage.market_data_processor import MarketDataProcessor
 class MarketManager:
     local_storage_directory = os.environ['LOCAL_STORAGE_ABSOLUTE_PATH']
     s3_helper = S3Service()
+    currency_service = CurrencyService()
     markets = []
 
     def list_markets(self) -> List[Market]:
@@ -43,12 +46,14 @@ class MarketManager:
         return []
 
     def process_markets(self):
-        s3_helper = S3Service()
-        s3_helper.synchronize_directory(
-            self.local_storage_directory,
-            is_local_to_s3=False)
+        self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=False)
         logging.info(f"Synced markets with s3 and start sync with platform.")
         # todo find all markets
-
+        result_exchange_info = self.currency_service.pull_exchange_info()
         # todo run update info script
+        for symbol in result_exchange_info['symbols']:
+            if DeployService.is_trading_open(symbol['tradingHours']):
+                print(f"Process symbol")
+                print(symbol)
+                pass
         pass

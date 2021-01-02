@@ -31,6 +31,11 @@ class TestDeployService(TestCase):
 
         deploy_service.upgrade_symbol_data(btc_symbol)
 
+    def test_is_trading_open(self):
+        trading_hours = 'UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00; Sun 22:05 -'
+        result = DeployService.is_trading_open(trading_hours)
+        self.assertTrue(not result)
+
     def test_update_old_file(self):
         # todo where little file is getting created on every test run
         old_file_path = "test_assets/little/exchange_info.json"
