@@ -35,7 +35,7 @@ class DeployService:
 
         for symbol_information in result_exchange_info['symbols']:
             symbol = Symbol(symbol_information)
-            if symbol.is_trading_open():
+            if symbol.status == 'TRADING':
                 logging.info(f"Trading for symbol:{symbol.name} is open. Start updating.")
                 symbol.upgrade_symbol_data(self.currency_service)
             else:
@@ -43,28 +43,6 @@ class DeployService:
 
         logging.info(f"Synchronized all updated data with s3")
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
-
-    # todo create parsing time and test
-    @staticmethod
-    def is_trading_open(trading_hours: str) -> bool:
-        # todo parse hours
-        # todo covert server time
-        return True
-        trading_days = trading_hours.split(';')
-        list_days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        assert "UTC" in trading_hours and list_days[0] in trading_days[1]
-        now_utc = datetime.now(timezone.utc)
-        week_start = now_utc - timedelta(days=now_utc.weekday(),
-                                         hours=now_utc.hour,
-                                         minutes=now_utc.minute,
-                                         seconds=now_utc.second)
-
-        for trading_day in trading_days:
-            if trading_day.strip().split(' ')[0] in list_days:
-                list_hours = trading_day.strip()[3:].split(',')
-        now_utc.weekday()
-
-        return True
 
     # todo test method
     @staticmethod

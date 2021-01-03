@@ -1,8 +1,8 @@
 import json
 import logging
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -18,21 +18,27 @@ class Symbol:
     def __init__(self, symbol_info):
         self.name = symbol_info['name']
         self.id = symbol_info['symbol']
+        self.status = symbol_info['status']
         self.symbol_data = pd.read_json(Symbol.symbol_data_file_path(symbol_info))
         self.symbol_information = symbol_info
 
     def process_symbol(self, currency_service: CurrencyService):
 
-        if self.is_trading_open():
+        if self.status == 'TRADING':
             logging.info(f"Start updating Symbol:{self.name}")
-            self.upgrade_symbol_data(currency_service)
+            if not self.upgrade_symbol_data(currency_service):
+                logging.info(f"Data has not changed since last time.")
+                return
             existing_data_frame = self.symbol_data
             latest_record_date = existing_data_frame['open_time'].max()
 
-            if not self.is_data_relevant():
+            if not self.is_data_relevant(latest_record_date):
+                logging.info(f"Data hasn't changed since Symbol:{self.name}")
                 return
 
             # todo process algorithms for anomaly detecting
+        else:
+            logging.info(f"Symbol:{self.id} is in {self.status} status. Skip processing.")
 
     @staticmethod
     def is_data_relevant(latest_record_date) -> bool:
@@ -60,7 +66,7 @@ class Symbol:
 
         return Symbol(market_id)
 
-    def upgrade_symbol_data(self, currency_service):
+    def upgrade_symbol_data(self, currency_service) -> bool:
 
         logging.info(f"Start updating Symbol:{self.name}")
         records_path = self.symbol_data_file_path(self.symbol_information)
@@ -87,43 +93,37 @@ class Symbol:
             currency_result.extend(currency_request_result)
             logging.info(f"Updating interval:{interval}, symbol:{self.id}")
             current_data_frame = pd.DataFrame(currency_result, columns=self.symbol_columns)
-            if int(latest_record_date.timestamp() * 1000) > current_data_frame['open_time'].min():
-                latest_records_data_frame = current_data_frame[
-                    current_data_frame['open_time'] > int(latest_record_date.timestamp() * 1000)]
-                existing_data_frame.append(latest_records_data_frame)
+            current_data_frame['open_time'] = pd.to_datetime(current_data_frame['open_time'] * 1000000)
+            logging.info(
+                f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame['open_time'].max()}")
+
+            if latest_record_date == current_data_frame['open_time'].max():
+                logging.info(
+                    f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame['open_time'].max()} has not changed since last update.")
+                break
+
+            if latest_record_date > current_data_frame['open_time'].min():
+                latest_records_data_frame = current_data_frame[current_data_frame['open_time'] > latest_record_date]
+                existing_data_frame = existing_data_frame.append(latest_records_data_frame)
                 logging.info(f"Found open time:{current_data_frame['open_time'].min()} and append to existing df")
                 break
+
         if len(currency_result) == 0:
             logging.info(f"No data from server for symbol:{self.id}")
-            return
+            return False
+        existing_data_frame.reset_index(drop=True, inplace=True)
         existing_data_frame.to_json(records_path)
+        self.symbol_data = existing_data_frame
         logging.info(f"Got out of loop on interval:{interval} and saved in file:{records_path}")
+        if existing_data_frame['open_time'].max() != latest_record_date:
+            logging.info(f"Upgraded data for symbol:{self.id}")
+            return True
+        else:
+            logging.info(f"Pulled the same data symbol:{self.id} skip upgrading.")
+            return False
 
     @staticmethod
     def symbol_data_file_path(symbol_info) -> str:
         records_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
                                     f"{symbol_info['baseAsset']}-{symbol_info['quoteAsset']}{Symbol.postfix}")
         return records_path
-
-    # todo create parsing time and test
-
-    def is_trading_open(self) -> bool:
-        # todo parse hours
-        # todo covert server time
-        trading_hours = self.symbol_information['tradingHours']
-        return True
-        trading_days = trading_hours.split(';')
-        list_days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        assert "UTC" in trading_hours and list_days[0] in trading_days[1]
-        now_utc = datetime.now(timezone.utc)
-        week_start = now_utc - timedelta(days=now_utc.weekday(),
-                                         hours=now_utc.hour,
-                                         minutes=now_utc.minute,
-                                         seconds=now_utc.second)
-
-        for trading_day in trading_days:
-            if trading_day.strip().split(' ')[0] in list_days:
-                list_hours = trading_day.strip()[3:].split(',')
-        now_utc.weekday()
-
-        return True

@@ -20,11 +20,6 @@ class TestSymbol(TestCase):
 
         self.assertTrue(file_path, "'/home/ubuntu/projects/python/crypto/currency-analytics/file_storage/ETH-EUR.json'")
 
-    def test_is_trading_open(self):
-        symbol = Symbol(self.generate_symbol())
-        result = symbol.is_trading_open()
-        self.assertTrue(not result)
-
     def test_process_symbol(self):
         symbol = Symbol(self.generate_symbol())
         currency_service = CurrencyService()
@@ -38,12 +33,6 @@ class TestSymbol(TestCase):
         # todo remove file from storage if eixsts
         btc_symbol = Symbol(btc_symbol_info)
         btc_symbol.upgrade_symbol_data(currency_service)
-
-    def test_is_trading_open(self):
-        btc_symbol_info = CurrencyServiceMock.generate_bitcoin_symbol()
-        btc_symbol = Symbol(btc_symbol_info)
-        is_open = btc_symbol.is_trading_open()
-        self.assertTrue(not is_open)
 
     def test_is_data_relevant(self):
         now_utc = datetime.now()
