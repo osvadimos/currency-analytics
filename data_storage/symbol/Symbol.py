@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -19,7 +20,15 @@ class Symbol:
         self.name = symbol_info['name']
         self.id = symbol_info['symbol']
         self.status = symbol_info['status']
-        self.symbol_data = pd.read_json(Symbol.symbol_data_file_path(symbol_info))
+        try:
+            if os.path.exists(Symbol.symbol_data_file_path(symbol_info)):
+                logging.info(f"File{Symbol.symbol_data_file_path(symbol_info)} exists.")
+                self.symbol_data = pd.read_json(Symbol.symbol_data_file_path(symbol_info))
+            else:
+                self.symbol_data = pd.DataFrame([], columns=Symbol.symbol_columns)
+        except:
+            logging.error(f"Failed to open Symbol:{self.id}. Remove storage file.", exc_info=sys.exc_info())
+            os.remove(Symbol.symbol_data_file_path(symbol_info))
         self.symbol_information = symbol_info
 
     def process_symbol(self, currency_service: CurrencyService):
@@ -69,11 +78,8 @@ class Symbol:
     def upgrade_symbol_data(self, currency_service) -> bool:
 
         logging.info(f"Start updating Symbol:{self.name}")
-        records_path = self.symbol_data_file_path(self.symbol_information)
-        if os.path.exists(records_path):
-            existing_data_frame = pd.read_json(records_path)
-        else:
-            existing_data_frame = pd.DataFrame([], columns=self.symbol_columns)
+
+        existing_data_frame = self.symbol_data.copy(deep=True)
         latest_record_date = existing_data_frame['open_time'].max()
         logging.info(f"Asset file for symbol:{self.id} : exists")
         currency_result = []
@@ -111,16 +117,23 @@ class Symbol:
         if len(currency_result) == 0:
             logging.info(f"No data from server for symbol:{self.id}")
             return False
-        existing_data_frame.reset_index(drop=True, inplace=True)
-        existing_data_frame.to_json(records_path)
-        self.symbol_data = existing_data_frame
-        logging.info(f"Got out of loop on interval:{interval} and saved in file:{records_path}")
+
+        logging.info(f"Got out of loop on interval:{interval}")
+        self.update_symbol_data(existing_data_frame)
+
         if existing_data_frame['open_time'].max() != latest_record_date:
             logging.info(f"Upgraded data for symbol:{self.id}")
             return True
         else:
             logging.info(f"Pulled the same data symbol:{self.id} skip upgrading.")
             return False
+
+    #todo test this method
+    def update_symbol_data(self, update_data_frame):
+        update_data_frame.reset_index(drop=True, inplace=True)
+        update_data_frame.to_json(Symbol.symbol_data_file_path(self.symbol_information))
+        self.symbol_data = update_data_frame
+        logging.info(f"Saved in file:{Symbol.symbol_data_file_path(self.symbol_information)}")
 
     @staticmethod
     def symbol_data_file_path(symbol_info) -> str:

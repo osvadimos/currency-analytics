@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from data_storage.aws.s3.S3Service import S3Service
 from data_storage.currency.CurrencyService import CurrencyService
@@ -29,8 +30,8 @@ class SymbolManager:
                     logging.info(f"Found existing symbol:{symbol.name} in memory.")
 
                 symbol.process_symbol(self.currency_service)
-            except:
-                logging.error(f"Failed to update Symbol:{symbol_info}")
+            except Exception as err:
+                logging.error(f"Failed to update Symbol:{symbol_info}", exc_info=sys.exc_info())
 
         self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
 
