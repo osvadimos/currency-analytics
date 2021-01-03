@@ -1,0 +1,460 @@
+{
+  "timezone": "UTC",
+  "serverTime": 1609059018395,
+  "rateLimits": [
+    {
+      "rateLimitType": "REQUEST_WEIGHT",
+      "interval": "MINUTE",
+      "intervalNum": 1,
+      "limit": 1200
+    },
+    {
+      "rateLimitType": "ORDERS",
+      "interval": "SECOND",
+      "intervalNum": 1,
+      "limit": 10
+    },
+    {
+      "rateLimitType": "ORDERS",
+      "interval": "DAY",
+      "intervalNum": 1,
+      "limit": 864000
+    }
+  ],
+  "exchangeFilters": [],
+  "symbols": [
+    {
+      "symbol": "EVK",
+      "name": "Evonik",
+      "status": "BREAK",
+      "baseAsset": "EVK",
+      "baseAssetPrecision": 3,
+      "quoteAsset": "EUR",
+      "quoteAssetId": "EUR",
+      "quotePrecision": 3,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "27000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "DE",
+      "sector": "Basic Materials",
+      "industry": "Diversified Chemicals",
+      "tradingHours": "UTC; Mon 08:02 - 16:30; Tue 08:02 - 16:30; Wed 08:02 - 16:30; Thu 08:02 - 16:30; Fri 08:02 - 16:30",
+      "tickSize": 0.005,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "MPW",
+      "name": "Medical Properties",
+      "status": "BREAK",
+      "baseAsset": "MPW",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "34000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "US",
+      "sector": "Financials",
+      "industry": "Specialized REITs",
+      "tradingHours": "UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00",
+      "tickSize": 0.01,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "GBP/CAD",
+      "name": "GBP/CAD",
+      "status": "HALT",
+      "baseAsset": "GBP",
+      "baseAssetPrecision": 5,
+      "quoteAsset": "CAD",
+      "quoteAssetId": "CAD",
+      "quotePrecision": 5,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "100",
+          "maxQty": "10000000",
+          "stepSize": "100"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00; Sun 22:05 -",
+      "tickSize": 5e-05,
+      "exchangeFee": 1
+    },
+    {
+      "symbol": "UPS",
+      "name": "United Parcel",
+      "status": "BREAK",
+      "baseAsset": "UPS",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "11000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "US",
+      "sector": "Industrials",
+      "industry": "Air Freight & Courier Services",
+      "tradingHours": "UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00",
+      "tickSize": 0.01,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "APH",
+      "name": "Amphenol",
+      "status": "BREAK",
+      "baseAsset": "APH",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "9000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "US",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00",
+      "tickSize": 0.01,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "APD",
+      "name": "Air Products",
+      "status": "BREAK",
+      "baseAsset": "APD",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "8000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "US",
+      "sector": "Basic Materials",
+      "industry": "Commodity Chemicals",
+      "tradingHours": "UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00",
+      "tickSize": 0.01,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "EPD",
+      "name": "Enterprise Products",
+      "status": "BREAK",
+      "baseAsset": "EPD",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "44000",
+          "stepSize": "1"
+        }
+      ],
+      "marketType": "SPOT",
+      "country": "US",
+      "sector": "Energy",
+      "industry": "Oil & Gas Transportation Services",
+      "tradingHours": "UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00",
+      "tickSize": 0.01,
+      "exchangeFee": 0.05
+    },
+    {
+      "symbol": "XRP/USD_LEVERAGE",
+      "name": "Ripple / USD",
+      "status": "TRADING",
+      "baseAsset": "XRP",
+      "baseAssetPrecision": 5,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD_LEVERAGE",
+      "quotePrecision": 5,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "1",
+          "maxQty": "1000000",
+          "stepSize": "1"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "0.29455000"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.0684932,
+      "shortRate": -0.0684932,
+      "swapChargeInterval": 480,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 1e-05,
+      "tickValue": 2.95e-06,
+      "tradingFee": 0.075
+    },
+    {
+      "symbol": "LTC/BTC_LEVERAGE",
+      "name": "Litecoin / Bitcoin",
+      "status": "TRADING",
+      "baseAsset": "LTC",
+      "baseAssetPrecision": 5,
+      "quoteAsset": "BTC",
+      "quoteAssetId": "BTC_LEVERAGE",
+      "quotePrecision": 5,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.01",
+          "maxQty": "10000",
+          "stepSize": "0.01"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "0.00004825"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.06,
+      "shortRate": 0.01,
+      "swapChargeInterval": 1440,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 1e-05,
+      "tickValue": 5e-08,
+      "tradingFee": 0.075
+    },
+    {
+      "symbol": "ETH/EUR_LEVERAGE",
+      "name": "Ethereum / EUR",
+      "status": "TRADING",
+      "baseAsset": "ETH",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "EUR",
+      "quoteAssetId": "EUR_LEVERAGE",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.01",
+          "maxQty": "1000",
+          "stepSize": "0.01"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "6"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.01,
+      "shortRate": 0.01,
+      "swapChargeInterval": 480,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 0.01,
+      "tickValue": 5.34985,
+      "makerFee": -0.025,
+      "takerFee": 0.075
+    },
+    {
+      "symbol": "BTC/EUR_LEVERAGE",
+      "name": "Bitcoin / EUR",
+      "status": "TRADING",
+      "baseAsset": "BTC",
+      "baseAssetPrecision": 3,
+      "quoteAsset": "EUR",
+      "quoteAssetId": "EUR_LEVERAGE",
+      "quotePrecision": 3,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.001",
+          "maxQty": "100",
+          "stepSize": "0.001"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "23"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.01,
+      "shortRate": 0.01,
+      "swapChargeInterval": 480,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 0.05,
+      "tickValue": 1144.46625,
+      "makerFee": -0.025,
+      "takerFee": 0.075
+    },
+    {
+      "symbol": "BCH/USD_LEVERAGE",
+      "name": "Bitcoin Cash / USD",
+      "status": "TRADING",
+      "baseAsset": "BCH",
+      "baseAssetPrecision": 2,
+      "quoteAsset": "USD",
+      "quoteAssetId": "USD_LEVERAGE",
+      "quotePrecision": 2,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.01",
+          "maxQty": "2500",
+          "stepSize": "0.01"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "4"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.06,
+      "shortRate": 0.01,
+      "swapChargeInterval": 1440,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 0.05,
+      "tickValue": 16.90625,
+      "tradingFee": 0.075
+    },
+    {
+      "symbol": "ETH/BTC_LEVERAGE",
+      "name": "Ethereum / Bitcoin",
+      "status": "TRADING",
+      "baseAsset": "ETH",
+      "baseAssetPrecision": 5,
+      "quoteAsset": "BTC",
+      "quoteAssetId": "BTC_LEVERAGE",
+      "quotePrecision": 5,
+      "orderTypes": [
+        "LIMIT",
+        "MARKET",
+        "STOP"
+      ],
+      "filters": [
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.01",
+          "maxQty": "1000",
+          "stepSize": "0.01"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "0.00023360"
+        }
+      ],
+      "marketType": "LEVERAGE",
+      "longRate": -0.06,
+      "shortRate": 0.01,
+      "swapChargeInterval": 1440,
+      "country": "",
+      "sector": "",
+      "industry": "",
+      "tradingHours": "UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00, 23:01 -; Sat - 22:00, 22:05 -; Sun - 21:00, 22:05 -",
+      "tickSize": 1e-05,
+      "tickValue": 2.3e-07,
+      "tradingFee": 0.075
+    }
+  ]
+}

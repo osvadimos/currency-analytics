@@ -1,4 +1,5 @@
 import json
+import os
 from unittest import TestCase
 
 from data_storage.data.DeployService import DeployService
@@ -50,3 +51,96 @@ class TestDeployService(TestCase):
     def test_deploy_data_if_not_empty_storage(self):
         # todo add somfe files first and then check if they are changed or something.
         pass
+
+    # test update method with symbols in all files
+    def test_update_little_file(self):
+        from tests.data_storage.test_s3_helper import TestS3Helper
+        absolute_file = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], TestS3Helper.create_random_string(10) + ".json")
+        absolute_file_opening = open(absolute_file, 'tw')
+        with open("test_assets/little/exchange_info.json", 'r') as little_info:
+            absolute_file_opening.write(little_info.read())
+            little_info.close()
+            absolute_file_opening.close()
+
+        with open("test_assets/big/exchange_info.json", 'r') as big_info:
+            big_data = big_info.read()
+            big_data = json.loads(big_data)
+            big_data["symbols"] = self.genarate_big_data()
+            big_info.close()
+
+        DeployService.update_symbols_data(absolute_file, big_data)
+
+        with open(absolute_file, 'r') as last_info:
+            last_data = last_info.read()
+            json_data = json.loads(last_data)
+            self.assertTrue(len(json_data["symbols"]) == len(big_data["symbols"]))
+
+    # test update method without symbols in little file
+    def test_update_little_file_without_in_little(self):
+        from tests.data_storage.test_s3_helper import TestS3Helper
+        absolute_file = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], TestS3Helper.create_random_string(10) + ".json")
+        absolute_file_opening = open(absolute_file, 'tw')
+        with open("test_assets/test_without_in_little/little/exchange_info.json", 'r') as little_info:
+            absolute_file_opening.write(little_info.read())
+            little_info.close()
+            absolute_file_opening.close()
+
+        with open("test_assets/test_without_in_little/big/exchange_info.json", 'r') as big_info:
+            big_data = big_info.read()
+            big_data = json.loads(big_data)
+            big_info.close()
+
+        DeployService.update_symbols_data(absolute_file, big_data)
+
+        with open(absolute_file, 'r') as last_info:
+            last_data = last_info.read()
+            json_data = json.loads(last_data)
+            self.assertTrue(len(json_data["symbols"]) == len(big_data["symbols"]))
+
+    # test update method without symbols in big file
+    def test_update_little_file_without_in_big(self):
+        from tests.data_storage.test_s3_helper import TestS3Helper
+        absolute_file = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], TestS3Helper.create_random_string(10) + ".json")
+        absolute_file_opening = open(absolute_file, 'tw')
+        with open("test_assets/test_without_in_big/little/exchange_info.json", 'r') as little_info:
+            absolute_file_opening.write(little_info.read())
+            little_info.close()
+            absolute_file_opening.close()
+
+        with open("test_assets/test_without_in_big/big/exchange_info.json", 'r') as big_info:
+            big_data = big_info.read()
+            big_data = json.loads(big_data)
+            big_info.close()
+
+        DeployService.update_symbols_data(absolute_file, big_data)
+
+        with open(absolute_file, 'r') as last_info:
+            last_data = last_info.read()
+            json_data = json.loads(last_data)
+            self.assertTrue(len(json_data["symbols"]) == len(big_data["symbols"]))
+
+    # test update method with symbols in all files and new value in big
+    def test_update_little_file_without_in_all_file(self):
+        from tests.data_storage.test_s3_helper import TestS3Helper
+        absolute_file = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], TestS3Helper.create_random_string(10) + ".json")
+        absolute_file_opening = open(absolute_file, 'tw')
+        with open("test_assets/test_in_all_file/little/exchange_info.json", 'r') as little_info:
+            absolute_file_opening.write(little_info.read())
+            little_info.close()
+            absolute_file_opening.close()
+
+        with open("test_assets/test_in_all_file/big/exchange_info.json", 'r') as big_info:
+            big_data = big_info.read()
+            big_data = json.loads(big_data)
+            big_info.close()
+
+        DeployService.update_symbols_data(absolute_file, big_data)
+
+        with open(absolute_file, 'r') as last_info:
+            last_data = last_info.read()
+            json_data = json.loads(last_data)
+            self.assertTrue(len(json_data["symbols"]) == len(big_data["symbols"]))
+
+    @staticmethod
+    def genarate_big_data():
+        return [{'symbol': 'EVK', 'name': 'Evonik', 'status': 'BREAK', 'baseAsset': 'EVK', 'baseAssetPrecision': 3, 'quoteAsset': 'EUR', 'quoteAssetId': 'EUR', 'quotePrecision': 3, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '27000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'DE', 'sector': 'Basic Materials', 'industry': 'Diversified Chemicals', 'tradingHours': 'UTC; Mon 08:02 - 16:30; Tue 08:02 - 16:30; Wed 08:02 - 16:30; Thu 08:02 - 16:30; Fri 08:02 - 16:30', 'tickSize': 0.005, 'exchangeFee': 0.05}, {'symbol': 'MPW', 'name': 'Medical Properties', 'status': 'BREAK', 'baseAsset': 'MPW', 'baseAssetPrecision': 2, 'quoteAsset': 'USD', 'quoteAssetId': 'USD', 'quotePrecision': 2, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '34000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'US', 'sector': 'Financials', 'industry': 'Specialized REITs', 'tradingHours': 'UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00', 'tickSize': 0.01, 'exchangeFee': 0.05}, {'symbol': 'GBP/CAD', 'name': 'GBP/CAD', 'status': 'HALT', 'baseAsset': 'GBP', 'baseAssetPrecision': 5, 'quoteAsset': 'CAD', 'quoteAssetId': 'CAD', 'quotePrecision': 5, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '100', 'maxQty': '10000000', 'stepSize': '100'}], 'marketType': 'SPOT', 'country': '', 'sector': '', 'industry': '', 'tradingHours': 'UTC; Mon - 22:00, 22:05 -; Tue - 22:00, 22:05 -; Wed - 22:00, 22:05 -; Thu - 22:00, 22:05 -; Fri - 22:00; Sun 22:05 -', 'tickSize': 5e-05, 'exchangeFee': 1}, {'symbol': 'UPS', 'name': 'United Parcel', 'status': 'BREAK', 'baseAsset': 'UPS', 'baseAssetPrecision': 2, 'quoteAsset': 'USD', 'quoteAssetId': 'USD', 'quotePrecision': 2, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '11000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'US', 'sector': 'Industrials', 'industry': 'Air Freight & Courier Services', 'tradingHours': 'UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00', 'tickSize': 0.01, 'exchangeFee': 0.05}, {'symbol': 'APH', 'name': 'Amphenol', 'status': 'BREAK', 'baseAsset': 'APH', 'baseAssetPrecision': 2, 'quoteAsset': 'USD', 'quoteAssetId': 'USD', 'quotePrecision': 2, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '9000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'US', 'sector': '', 'industry': '', 'tradingHours': 'UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00', 'tickSize': 0.01, 'exchangeFee': 0.05}, {'symbol': 'APD', 'name': 'Air Products', 'status': 'BREAK', 'baseAsset': 'APD', 'baseAssetPrecision': 2, 'quoteAsset': 'USD', 'quoteAssetId': 'USD', 'quotePrecision': 2, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '8000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'US', 'sector': 'Basic Materials', 'industry': 'Commodity Chemicals', 'tradingHours': 'UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00', 'tickSize': 0.01, 'exchangeFee': 0.05}, {'symbol': 'EPD', 'name': 'Enterprise Products', 'status': 'BREAK', 'baseAsset': 'EPD', 'baseAssetPrecision': 2, 'quoteAsset': 'USD', 'quoteAssetId': 'USD', 'quotePrecision': 2, 'orderTypes': ['LIMIT', 'MARKET'], 'filters': [{'filterType': 'LOT_SIZE', 'minQty': '1', 'maxQty': '44000', 'stepSize': '1'}], 'marketType': 'SPOT', 'country': 'US', 'sector': 'Energy', 'industry': 'Oil & Gas Transportation Services', 'tradingHours': 'UTC; Mon 14:30 - 21:00; Tue 14:30 - 21:00; Wed 14:30 - 21:00; Thu 14:30 - 21:00; Fri 14:30 - 21:00', 'tickSize': 0.01, 'exchangeFee': 0.05}]
