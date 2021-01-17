@@ -20,6 +20,7 @@ class Symbol:
         self.name = symbol_info['name']
         self.id = symbol_info['symbol']
         self.status = symbol_info['status']
+        self.latest_record = None
         try:
             if os.path.exists(Symbol.symbol_data_file_path(symbol_info)):
                 logging.info(f"File{Symbol.symbol_data_file_path(symbol_info)} exists.")
@@ -38,14 +39,14 @@ class Symbol:
             if not self.upgrade_symbol_data(currency_service):
                 logging.info(f"Data has not changed since last time.")
                 return
-            existing_data_frame = self.symbol_data
-            latest_record_date = existing_data_frame['open_time'].max()
 
-            if not self.is_data_relevant(latest_record_date):
-                logging.info(f"Data hasn't changed since Symbol:{self.name}")
-                return
+            # todo disable relevance for now
+            # latest_record_date = self.symbol_data['open_time'].max()
+            # if not self.is_data_relevant(latest_record_date):
+            #    logging.info(f"Data hasn't changed since Symbol:{self.name}")
+            #    return
 
-            # todo process algorithms for anomaly detecting
+            self.detect_symbol_anomalies()
         else:
             logging.info(f"Symbol:{self.id} is in {self.status} status. Skip processing.")
 
@@ -56,6 +57,7 @@ class Symbol:
                                        hours=1,
                                        minutes=0,
                                        seconds=0)
+        logging.info(f"Relevance between dates Now:{now_utc} and hour ago:{hour_old}")
         return latest_record_date.replace(tzinfo=None) > hour_old.replace(tzinfo=None)
 
     @staticmethod
@@ -81,7 +83,8 @@ class Symbol:
 
         existing_data_frame = self.symbol_data.copy(deep=True)
         latest_record_date = existing_data_frame['open_time'].max()
-        logging.info(f"Asset file for symbol:{self.id} : exists")
+        self.latest_record = self.symbol_data[self.symbol_data['open_time'] == existing_data_frame['open_time'].max()]
+        logging.info(f"Asset file for symbol:{self.id}:exists with latest record:{self.latest_record}")
         currency_result = []
         for interval in [CandlesticksChartIntervals.MINUTE,
                          CandlesticksChartIntervals.FIVE_MINUTES,
@@ -118,17 +121,17 @@ class Symbol:
             logging.info(f"No data from server for symbol:{self.id}")
             return False
 
-        logging.info(f"Got out of loop on interval:{interval}")
-        self.update_symbol_data(existing_data_frame)
-
         if existing_data_frame['open_time'].max() != latest_record_date:
+            logging.info(f"Got out of loop on interval:{interval} and dropping duplicates.")
+            existing_data_frame = pd.DataFrame.drop_duplicates(existing_data_frame)
+            self.update_symbol_data(existing_data_frame)
             logging.info(f"Upgraded data for symbol:{self.id}")
             return True
         else:
             logging.info(f"Pulled the same data symbol:{self.id} skip upgrading.")
             return False
 
-    #todo test this method
+    # todo test this method
     def update_symbol_data(self, update_data_frame):
         update_data_frame.reset_index(drop=True, inplace=True)
         update_data_frame.to_json(Symbol.symbol_data_file_path(self.symbol_information))
@@ -140,3 +143,14 @@ class Symbol:
         records_path = os.path.join(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'],
                                     f"{symbol_info['baseAsset']}-{symbol_info['quoteAsset']}{Symbol.postfix}")
         return records_path
+
+    # todo test
+    def detect_symbol_anomalies(self):
+
+        if self.latest_record is not None and self.symbol_data['open_time'].max() != self.latest_record['open_time'].max():
+            logging.info(f"Start processing anomalies symbol:{self.id}")
+            # todo process algorithms for anomaly detecting
+            # todo define opening (find time gap between recent records)
+            # todo define gap
+            # todo define up/down slope
+            pass

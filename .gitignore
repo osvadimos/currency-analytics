@@ -7,3 +7,4 @@ file_storage/
 env
 currency-analytics.log
 jypiters/.ipynb_checkpoints/
+*.pyc
