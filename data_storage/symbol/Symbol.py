@@ -82,8 +82,9 @@ class Symbol:
         logging.info(f"Start updating Symbol:{self.name}")
 
         existing_data_frame = self.symbol_data.copy(deep=True)
-        latest_record_date = existing_data_frame['open_time'].max()
-        self.latest_record = self.symbol_data[self.symbol_data['open_time'] == existing_data_frame['open_time'].max()]
+        latest_record_date = existing_data_frame[self.symbol_columns[0]].max()
+        self.latest_record = self.symbol_data[
+            self.symbol_data[self.symbol_columns[0]] == existing_data_frame[self.symbol_columns[0]].max()]
         logging.info(f"Asset file for symbol:{self.id}:exists with latest record:{self.latest_record}")
         currency_result = []
         for interval in [CandlesticksChartIntervals.MINUTE,
@@ -102,26 +103,29 @@ class Symbol:
             currency_result.extend(currency_request_result)
             logging.info(f"Updating interval:{interval}, symbol:{self.id}")
             current_data_frame = pd.DataFrame(currency_result, columns=self.symbol_columns)
-            current_data_frame['open_time'] = pd.to_datetime(current_data_frame['open_time'] * 1000000)
+            current_data_frame[self.symbol_columns[0]] = pd.to_datetime(
+                current_data_frame[self.symbol_columns[0]] * 1000000)
             logging.info(
-                f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame['open_time'].max()}")
+                f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame[self.symbol_columns[0]].max()}")
 
-            if latest_record_date == current_data_frame['open_time'].max():
+            if latest_record_date == current_data_frame[self.symbol_columns[0]].max():
                 logging.info(
-                    f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame['open_time'].max()} has not changed since last update.")
+                    f"Symbol:{self.name} latest_record:{latest_record_date} current:{current_data_frame[self.symbol_columns[0]].max()} has not changed since last update.")
                 break
 
-            if latest_record_date > current_data_frame['open_time'].min():
-                latest_records_data_frame = current_data_frame[current_data_frame['open_time'] > latest_record_date]
+            if latest_record_date > current_data_frame[self.symbol_columns[0]].min():
+                latest_records_data_frame = current_data_frame[
+                    current_data_frame[self.symbol_columns[0]] > latest_record_date]
                 existing_data_frame = existing_data_frame.append(latest_records_data_frame)
-                logging.info(f"Found open time:{current_data_frame['open_time'].min()} and append to existing df")
+                logging.info(
+                    f"Found open time:{current_data_frame[self.symbol_columns[0]].min()} and append to existing df")
                 break
 
         if len(currency_result) == 0:
             logging.info(f"No data from server for symbol:{self.id}")
             return False
 
-        if existing_data_frame['open_time'].max() != latest_record_date:
+        if existing_data_frame[self.symbol_columns[0]].max() != latest_record_date:
             logging.info(f"Got out of loop on interval:{interval} and dropping duplicates.")
             existing_data_frame = pd.DataFrame.drop_duplicates(existing_data_frame)
             self.update_symbol_data(existing_data_frame)
@@ -145,12 +149,19 @@ class Symbol:
         return records_path
 
     # todo test
-    def detect_symbol_anomalies(self):
+    def detect_symbol_anomalies(self) -> bool:
 
-        if self.latest_record is not None and self.symbol_data['open_time'].max() != self.latest_record['open_time'].max():
+        if self.latest_record is None:
+            logging.info(f"Could not find latest record for symbol:{self.id}")
+            return False
+
+        if self.symbol_data[self.symbol_columns[0]].max() != self.latest_record[self.symbol_columns[0]].max():
             logging.info(f"Start processing anomalies symbol:{self.id}")
             # todo process algorithms for anomaly detecting
             # todo define opening (find time gap between recent records)
             # todo define gap
             # todo define up/down slope
-            pass
+            return True
+
+        logging.info(f"Last record and data are the same symbol:{self.id}")
+        return False

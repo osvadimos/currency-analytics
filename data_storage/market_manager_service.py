@@ -18,15 +18,15 @@ class SymbolManager:
         logging.info(f"Synced markets with s3 and start sync with platform.")
 
         result_exchange_info = self.currency_service.pull_exchange_info()
-
+        symbol = None
         for symbol_info in result_exchange_info['symbols']:
             try:
                 if symbol_info['name'] not in self.local_symbols:
                     symbol = Symbol(symbol_info)
-                    self.local_symbols[symbol.id] = symbol
+                    #self.local_symbols[symbol.id] = symbol
                     logging.info(f"Create new symbol:{symbol.name} in memory.")
                 else:
-                    symbol = self.local_symbols[symbol_info['name']]
+                    #symbol = self.local_symbols[symbol_info['name']]
                     logging.info(f"Found existing symbol:{symbol.name} in memory.")
 
                 symbol.process_symbol(self.currency_service)
