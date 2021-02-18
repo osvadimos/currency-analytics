@@ -19,6 +19,8 @@ class SymbolManager:
 
         result_exchange_info = self.currency_service.pull_exchange_info()
         symbol = None
+        number_of_symbols = len(result_exchange_info["symbols"])
+        logging.info(f'Found {number_of_symbols} symbols')
         for symbol_info in result_exchange_info['symbols']:
             try:
                 if symbol_info['name'] not in self.local_symbols:
@@ -32,7 +34,9 @@ class SymbolManager:
                 symbol.process_symbol(self.currency_service)
             except Exception as err:
                 logging.error(f"Failed to update Symbol:{symbol_info}", exc_info=sys.exc_info())
+            number_of_symbols -= 1
+            logging.info(f"Left {number_of_symbols} symbols")
 
-        self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
+            self.s3_helper.synchronize_directory(os.environ['LOCAL_STORAGE_ABSOLUTE_PATH'], is_local_to_s3=True)
 
         logging.info(f"Synced markets with s3 after processing.")
